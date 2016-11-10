@@ -1,0 +1,36 @@
+---
+ip: "192.168.10.10"
+memory: 2048
+cpus: 1
+hostname: scmf
+name: scmf
+provider: virtualbox
+
+authorize: ~/.ssh/id_rsa.pub
+
+keys:
+    - ~/.ssh/id_rsa
+
+folders:
+    - map: "/Users/riccardo/Documents/web/symfony/scmf"
+      to: "/home/vagrant/scmf"
+
+sites:
+    - map: scfm.app
+      to: "/home/vagrant/scmf/public"
+
+databases:
+    - scfm
+
+# blackfire:
+#     - id: foo
+#       token: bar
+#       client-id: foo
+#       client-token: bar
+
+# ports:
+#     - send: 50000
+#       to: 5000
+#     - send: 7777
+#       to: 777
+#       protocol: udp
