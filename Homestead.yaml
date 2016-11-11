@@ -17,7 +17,7 @@ folders:
 
 sites:
     - map: scfm.app
-      to: "/home/vagrant/scmf/public"
+      to: "/home/vagrant/scmf/docroot/public"
 
 databases:
     - scfm
