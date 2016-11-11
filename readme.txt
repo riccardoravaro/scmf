@@ -13,6 +13,14 @@ user homestead
 password secret
 
 
+app/console doctrine:database:create
+app/console doctrine:phpcr:init:dbal --force
+app/console doctrine:phpcr:repository:init
+app/console doctrine:phpcr:fixtures:load
+
+
+
+
 nginx configuration example
 
 server {

@@ -1,39 +1,174 @@
-# Symfony CMF Standard Edition
+# Symfony Content Management Framework Sandbox  
 
-[![Build Status](https://secure.travis-ci.org/symfony-cmf/standard-edition.png?branch=master)](http://travis-ci.org/symfony-cmf/standard-edition)
-[![Latest Stable Version](https://poser.pugx.org/symfony-cmf/standard-edition/version.png)](https://packagist.org/packages/symfony-cmf/standard-edition)
-[![Total Downloads](https://poser.pugx.org/symfony-cmf/standard-edition/d/total.png)](https://packagist.org/packages/symfony-cmf/standard-edition)
+[![Build Status](https://secure.travis-ci.org/symfony-cmf/cmf-sandbox.png?branch=master)](http://travis-ci.org/symfony-cmf/cmf-sandbox) [![SensioLabsInsight](https://insight.sensiolabs.com/projects/01a6d3b6-a2b4-4a0a-b3cd-2b46a62d6ed9/mini.png)](https://insight.sensiolabs.com/projects/01a6d3b6-a2b4-4a0a-b3cd-2b46a62d6ed9)
+[![StyleCI](https://styleci.io/repos/1316499/shield)](https://styleci.io/repos/1316499)
+[![Dependency Status](https://www.versioneye.com/php/symfony-cmf:sandbox/badge.svg)](https://www.versioneye.com/php/symfony-cmf:sandbox)
 
-The Symfony CMF Standard Edition (SE) is a distribution of the
-[Symfony Content Management Framework (CMF)](http://cmf.symfony.com/)
-and licensed under the [MIT License](LICENSE).
+This sandbox is a testing ground for the cmf bundles being developed.
 
-This distribution is based on all the main CMF components needed for most common
-use cases, and can be used to create a new Symfony/CMF project from scratch.
+It is based on the [Symfony Standard edition](https://github.com/symfony/symfony-standard) and adds all
+cmf related bundles on top of the standard edition bundles.
 
-## Requirements
+Link to the [live demo](http://sandbox.cmf.symfony.com/)
 
-* Symfony 2.3.x
-* See also the `require` section of [composer.json](composer.json)
+## Getting started
 
-## Documentation
+You can run the sandbox on your system, or in a virtualbox VM using Vagrant. For the latter, see
+"Getting started using Vagrant"
 
-For the install guide and reference, see:
+### You will need:
 
-* [Symfony CMF standard edition documentation](http://symfony.com/doc/master/cmf/book/installation.html)
+  * PHP 5.3.9+ (with intl extension)
+  * PHPUnit 3.6+ (optional)
+  * Composer
 
-See also:
+## Initial setup and configuration
 
-* [All Symfony CMF documentation](http://symfony.com/doc/master/cmf/index.html) - complete Symfony CMF reference
-* [Symfony CMF Website](http://cmf.symfony.com/) - introduction, live demo, support and community links
+    git clone git://github.com/symfony-cmf/cmf-sandbox.git
+    cd cmf-sandbox
+    curl -s http://getcomposer.org/installer | php --
+    php composer.phar install
 
-## Contributing
+Note: On Windows you need to run the shell as Administrator or edit the `composer.json` and
+change the line `"symfony-assets-install": "symlink"` to `"symfony-assets-install": ""`
+If you fail to do this you might receive:
 
-Pull requests are welcome. Please see our [CONTRIBUTING](https://github.com/symfony-cmf/symfony-cmf-docs/blob/master/CONTRIBUTING.md) guide.
+    [Symfony\Component\Filesystem\Exception\IOException]
+    Unable to create symlink due to error code 1314: 'A required privilege is not held by the client'. Do you have the required Administrator-rights?
 
-Unit and/or functional tests exist for this bundle. See the
-[Testing documentation](http://symfony.com/doc/master/cmf/components/testing.html)
-for a guide to running the tests.
+At the end of the installation you will be interactively asked several configuration
+questions. Note that by default you will end up with a configuration using
+SQLite and Doctrine DBAL for storage. If you want to adjust the configuration
+to use Jackrabbit please look at the following section.
 
-Thanks to
-[everyone who has contributed](https://github.com/symfony-cmf/standard-edition/contributors) already.
+### Install and run Apache JackRabbit
+
+Follow the guide in the [Jackalope Wiki](https://github.com/jackalope/jackalope/wiki/Running-a-jackrabbit-server).
+You can also use a different PHPCR implementation but this is the most solid
+implementation.
+
+Once you have that, copy the default jackalope-jackrabbit configuration file,
+adjust it as needed and install the dependencies with composer:
+
+    cp app/config/phpcr_jackrabbit.yml.dist app/config/phpcr.yml
+
+The last command will fetch the main project and all its dependencies (CMF
+Bundles, Symfony, Doctrine\PHPCR, Jackalope ... ). You might want to have a look
+at the ``app/config/parameters.yml`` and adjust as needed.
+
+### Install the Doctrine DBAL provider (optional)
+
+Instead of `phpcr_jackrabbit.yml.dist`, use the `phpcr_doctrine_dbal*.yml.dist`
+files and create the database accordingly. If you have the PHP sqlite extension
+available, this is the simplest to quickly try out the CMF. Copy the file
+and then install the dependencies:
+
+    cp app/config/phpcr_doctrine_dbal.yml.dist app/config/phpcr.yml
+
+The Doctrine DBAL implementation is installed by default already along side the Jackrabbit implementation.
+
+To disable the meta data and node cache for debugging comment the ``caches`` settings in the `phpcr.yml`.
+
+Then, create the database and tables and set up the default workspace using:
+
+    php app/console doctrine:database:create
+    php app/console doctrine:phpcr:init:dbal
+
+## Prepare the PHPCR repository
+
+First you need to create a workspace that will hold the data for the sandbox.
+The default parameters.yml defines the workspace to be 'default'. You can
+change this of course. If you do, f.e. to 'sandbox, also run the following command:
+
+    php app/console doctrine:phpcr:workspace:create sandbox
+
+Once your workspace is set up, you need to [register the node types](https://github.com/doctrine/phpcr-odm/wiki/Custom-node-type-phpcr%3Amanaged)
+for PHPCR-ODM:
+
+    php app/console doctrine:phpcr:repository:init
+
+## Import the fixtures
+
+The admin backend is still in an early stage. Until it improves, the easiest is
+to programmatically create data. The best way to do that is with the doctrine
+data fixtures. The DoctrinePHPCRBundle included in the symfony-cmf repository
+provides a command to load fixtures:
+
+    php app/console -v doctrine:phpcr:fixtures:load
+
+Run this to load the fixtures from the Sandbox AppBundle.
+
+## Setup filesystem permissions
+
+As with any Symfony2 installation, you need to set up some filesystem permissions.
+A good guide is in the [Symfony2 installation guide](http://symfony.com/doc/current/book/installation.html#configuration-and-setup).
+If you use the default setup, an sqlite database will be created at `app/app.sqlite`.
+You need to set up permissions for this file and the app/ folder with the method
+you chose from the installation guide.
+
+If you just want to move on and try out the sandbox for now, you can
+run:
+
+    sudo chmod -R 777 app/
+
+## Access by web browser
+
+Create an apache virtual host entry along the lines of:
+
+    <Virtualhost *:80>
+        Servername cmf.lo
+        DocumentRoot /path/to/symfony-cmf/cmf-sandbox/web
+        <Directory /path/to/symfony-cmf/cmf-sandbox>
+            AllowOverride All
+        </Directory>
+    </Virtualhost>
+
+And add an entry to your hosts file for cmf.lo
+
+If you are running Symfony2 for the first time, run http://cmf.lo/config.php to ensure your system settings have been
+setup inline with the expected behaviour of the Symfony2 framework.
+
+Note however that "Configure your Symfony Application online" is not supported in the sandbox.
+
+Then point your browser to http://cmf.lo/app_dev.php
+
+## Production environment
+
+In order to run the sandbox in production mode at http://cmf.lo/
+you need to generate the doctrine proxies and dump the assetic assets:
+
+    php app/console cache:warmup --env=prod --no-debug
+    php app/console assetic:dump --env=prod --no-debug
+
+# Getting started using Vagrant
+
+please checkout the [README.md](vagrant) in the vagrant/ folder of the project
+
+# Other hints
+
+## Console
+
+The PHPCR ODM Bundle provides a couple of useful commands in the doctrine:phpcr namespace.
+Type app/console to see them all.
+
+## Admin interface
+
+There is a proof-of-concept admin interface using the SonataPhpcrAdminBundle at
+http://cmf.lo/app_dev.php/admin/dashboard
+
+Basically you have paginated lists for two types of documents. You create new documents, edit and delete them.
+Some filtering is available in the list. This bundle is an implementation of
+[Sonata Admin Bundle](https://github.com/sonata-project/SonataAdminBundle)
+
+At the moment there is no notion of parents and sons in the admin bundle.
+
+## Run the test suite
+
+Functional tests are written with PHPUnit. Note that Bundles and Components are tested independently:
+
+    php app/console doctrine:phpcr:workspace:create sandbox_test
+    phpunit -c app
+
+## Remove demo configuration
+
+If you start a project from the sandbox, remove ```.sensiolabs.yml``` as its not a good example for production use.

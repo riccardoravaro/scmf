@@ -20,7 +20,7 @@ sites:
       to: "/home/vagrant/scmf/docroot/public"
 
 databases:
-    - scfm
+    - scfm2
 
 # blackfire:
 #     - id: foo
