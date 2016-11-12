@@ -26,7 +26,7 @@ nginx configuration example
 server {
     listen 80;
     listen 443 ssl;
-    server_name  scfm scfm.app;
+    server_name  scmf scmf.app;
     root "/home/vagrant/scmf/docroot/web";
 
      location / {

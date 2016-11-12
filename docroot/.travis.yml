@@ -4,7 +4,6 @@ php:
   - 5.3
   - 5.4
   - 5.5
-  # 5.6 is tested using composer install
   - 7.0
   - hhvm
 
@@ -12,31 +11,27 @@ sudo: false
 
 cache:
   directories:
-    - $HOME/.composer/cache/files
-
-matrix:
-  fast_finish: true
-  include:
-    - php: 5.6
-      env: TRANSPORT=jackrabbit COMPOSER_INSTALL=1
-    - php: 5.6
-      env: TRANSPORT=doctrine_dbal COMPOSER_INSTALL=1
+    - $HOME/.composer/cache
 
 env:
-  - TRANSPORT=jackrabbit
-  - TRANSPORT=doctrine_dbal
+  global:
+    - SYMFONY_DEPRECATIONS_HELPER=34
+
+matrix:
+  finish_fast: true
+  include:
+    - php: 5.6
+      env: COMPOSER_CMD=install
 
 before_install:
+  - if [[ "$TRAVIS_PHP_VERSION" != "hhvm" ]]; then echo "memory_limit = -1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi
+  - phpenv config-rm xdebug.ini || true
   - composer self-update
-  - if [ "$TRAVIS_PHP_VERSION" != "hhvm" ]; then echo "memory_limit = -1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi
 
-install: if [ "$COMPOSER_INSTALL" != "1" ]; then composer update --no-scripts --prefer-dist; else composer install --no-scripts --prefer-dist; fi
+install: if [ "$COMPOSER_CMD" = "install" ]; then composer install --prefer-dist; else composer update --prefer-dist; fi
 
 before_script:
-  - cp app/config/phpcr_${TRANSPORT}.yml.dist app/config/phpcr.yml
-  - composer run-script post-update-cmd
-  - ./app/tests/travis_${TRANSPORT}.sh
-  - app/console doctrine:phpcr:workspace:create sandbox_test -e=test
+  - app/console doctrine:phpcr:init:dbal --force -e=test
   - app/console doctrine:phpcr:repository:init -e=test
 
 script: phpunit -c app

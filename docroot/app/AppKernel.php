@@ -1,92 +1,56 @@
 <?php
 
-/*
- * This file is part of the Symfony CMF package.
- *
- * (c) 2011-2015 Symfony CMF
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
 
 class AppKernel extends Kernel
 {
+    public function __construct($enviroment, $debug)
+    {
+        date_default_timezone_set("Europe/Paris");
+        parent::__construct($enviroment, $debug);
+    }
+
     public function registerBundles()
     {
         $bundles = array(
-            // enable symfony-standard bundles
+            // Symfony Standard Edition Bundles
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+            new Symfony\Bundle\AsseticBundle\AsseticBundle(),
             new Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new Symfony\Bundle\TwigBundle\TwigBundle(),
             new Symfony\Bundle\MonologBundle\MonologBundle(),
             new Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle(),
-            new Symfony\Bundle\AsseticBundle\AsseticBundle(),
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
 
-            // enable cmf bundles
+            // Symfony CMF Standard Edition Bundles
             new Doctrine\Bundle\PHPCRBundle\DoctrinePHPCRBundle(),
-            new Symfony\Cmf\Bundle\RoutingBundle\CmfRoutingBundle(),
+            new Doctrine\Bundle\DoctrineCacheBundle\DoctrineCacheBundle(),
             new Symfony\Cmf\Bundle\CoreBundle\CmfCoreBundle(),
-            new Knp\Bundle\MenuBundle\KnpMenuBundle(),
-            new Symfony\Cmf\Bundle\MenuBundle\CmfMenuBundle(),
             new Symfony\Cmf\Bundle\ContentBundle\CmfContentBundle(),
-            new Symfony\Cmf\Bundle\TreeBrowserBundle\CmfTreeBrowserBundle(),
-            new Symfony\Cmf\Bundle\BlockBundle\CmfBlockBundle(),
+            new Symfony\Cmf\Bundle\RoutingBundle\CmfRoutingBundle(),
             new Symfony\Cmf\Bundle\SimpleCmsBundle\CmfSimpleCmsBundle(),
-            new Symfony\Cmf\Bundle\SeoBundle\CmfSeoBundle(),
-            new \Burgov\Bundle\KeyValueFormBundle\BurgovKeyValueFormBundle(),
-            new Liip\SearchBundle\LiipSearchBundle(),
-            new Symfony\Cmf\Bundle\SearchBundle\CmfSearchBundle(),
-            new Symfony\Cmf\Bundle\MediaBundle\CmfMediaBundle(),
-            new FM\ElfinderBundle\FMElfinderBundle(),
-            new Symfony\Cmf\Bundle\RoutingAutoBundle\CmfRoutingAutoBundle(),
 
-            // language switcher
-            new Lunetics\LocaleBundle\LuneticsLocaleBundle(),
-
-            // API
-            new FOS\RestBundle\FOSRestBundle(),
-            new JMS\SerializerBundle\JMSSerializerBundle(),
-
-            // admin bundle
-            new Sonata\jQueryBundle\SonatajQueryBundle(),
+            new Symfony\Cmf\Bundle\BlockBundle\CmfBlockBundle(),
             new Sonata\BlockBundle\SonataBlockBundle(),
             new Sonata\CoreBundle\SonataCoreBundle(),
-            new Sonata\AdminBundle\SonataAdminBundle(),
-            new Sonata\DoctrinePHPCRAdminBundle\SonataDoctrinePHPCRAdminBundle(),
-            new Sonata\SeoBundle\SonataSeoBundle(),
-            new Sonata\TranslationBundle\SonataTranslationBundle(),
-            new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
-            new Ivory\CKEditorBundle\IvoryCKEditorBundle(),
 
-            // Media support
-            new Liip\ImagineBundle\LiipImagineBundle(),
+            new Symfony\Cmf\Bundle\MenuBundle\CmfMenuBundle(),
+            new Knp\Bundle\MenuBundle\KnpMenuBundle(),
 
-            // jackalope doctrine caching
-            new Doctrine\Bundle\DoctrineCacheBundle\DoctrineCacheBundle(),
+            new Symfony\Cmf\Bundle\CreateBundle\CmfCreateBundle(),
+            new FOS\RestBundle\FOSRestBundle(),
 
-            // block caching and feeds
-            new Sonata\CacheBundle\SonataCacheBundle(),
-            new Eko\FeedBundle\EkoFeedBundle(),
-
-            // and the app bundle
+            // Application bundles
             new AppBundle\AppBundle(),
         );
 
-        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
-            $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
+        if (in_array($this->getEnvironment(), array('dev', 'test'), true)) {
             $bundles[] = new Symfony\Bundle\DebugBundle\DebugBundle();
-            $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
+            $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
-
-            // additional bundle for tests
-            if ('test' === $this->getEnvironment()) {
-                $bundles[] = new Liip\FunctionalTestBundle\LiipFunctionalTestBundle();
-            }
+            $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
         }
 
         return $bundles;
@@ -94,6 +58,6 @@ class AppKernel extends Kernel
 
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
-        $loader->load(__DIR__.'/config/config_'.$this->getEnvironment().'.yml');
+        $loader->load($this->getRootDir().'/config/config_'.$this->getEnvironment().'.yml');
     }
 }
